@@ -8,6 +8,18 @@ app.use(express.json());
 
 const projects = [];
 
+const logRequest = function (request, response, next) {
+    const { method, url } = request;
+
+    const logLabel = `[${method.toUpperCase()}] ${url}`;
+
+    console.log(logLabel);
+
+    return next();
+}
+
+app.use(logRequest);
+
 app.post('/projects', (request, response) => {
     const { title, owner } = request.body;
 
