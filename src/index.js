@@ -1,5 +1,5 @@
 const express = require('express');
-const { v4: uuid } = require('uuid');
+const { v4: uuid, validate } = require('uuid');
 
 
 const app = express();
@@ -18,9 +18,16 @@ const logRequest = function (request, response, next) {
     return next();
 }
 
-app.use(logRequest);
+function validateProject(request, response, next) {
+    const { id } = request.params;
 
-app.post('/projects', (request, response) => {
+    console.log(validate(id))
+
+    return next();
+}
+
+
+app.post('/projects', logRequest, validateProject, (request, response) => {
     const { title, owner } = request.body;
 
     const project = { id: uuid(), title, owner }
@@ -29,6 +36,8 @@ app.post('/projects', (request, response) => {
 
     return response.json(project);
 })
+
+app.use(logRequest);
 
 app.get('/projects', (request, response) => {
     const { title } = request.query;
@@ -44,7 +53,7 @@ app.get('/projects', (request, response) => {
 })
 
 
-app.put('/projects/:id', (request, response) => {
+app.put('/projects/:id', validateProject, (request, response) => {
     const { id } = request.params;
     const { title, owner } = request.body;
 
