@@ -21,13 +21,19 @@ const logRequest = function (request, response, next) {
 function validateProject(request, response, next) {
     const { id } = request.params;
 
-    console.log(validate(id))
+    if (!validate(id)) {
+        return response.status(400).json({ error: "Invalid Project ID" });
+    }
 
     return next();
 }
 
 
-app.post('/projects', logRequest, validateProject, (request, response) => {
+app.use(logRequest);
+app.use('/projects/:id', validateProject)
+
+
+app.post('/projects', (request, response) => {
     const { title, owner } = request.body;
 
     const project = { id: uuid(), title, owner }
@@ -37,12 +43,9 @@ app.post('/projects', logRequest, validateProject, (request, response) => {
     return response.json(project);
 })
 
-app.use(logRequest);
 
 app.get('/projects', (request, response) => {
     const { title } = request.query;
-
-    console.log(title);
 
     const results = title
         ? projects.filter(project => project.title.includes(title))
@@ -76,8 +79,6 @@ app.put('/projects/:id', validateProject, (request, response) => {
 
 app.patch('/projects/:id', (request, response) => {
     const { id } = request.params;
-
-    console.log(id);
 
     return response.json([
         "project 5",
